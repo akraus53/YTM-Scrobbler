@@ -45,7 +45,7 @@ jarowinkler = JaroWinkler()
 
 if last_song[0] != title:  # Check, so that this program doesn't scrobble the song multiple times
     last_scrobble = \
-        network.get_user(username).get_recent_tracks(limit=1)
+        network.get_user(lastFmCreds['username']).get_recent_tracks(limit=1)
 
     logger.write('   LastFM: Last song was %s by %s\n'
                  % (last_scrobble[0][0].title,
