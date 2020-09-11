@@ -1,7 +1,9 @@
 headers_auth.json
 logindata.json
+last_song.json
 .idea/
-log.txt
+logs/
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

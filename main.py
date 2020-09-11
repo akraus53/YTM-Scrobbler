@@ -1,11 +1,15 @@
 from ytmusicapi import YTMusic
+import os
 import pylast
 import datetime
 import time
 import json
 from strsimpy.jaro_winkler import JaroWinkler
 
-logger = open('log.txt', 'a+')
+if not os.path.isdir('./logs'):
+    os.mkdir('./logs')
+
+logger = open('./logs/log_{}.txt'.format(datetime.datetime.now().strftime('%F')), 'a+')
 logger.write('%s\n' % datetime.datetime.now())
 
 ############### YTM ###############
@@ -37,10 +41,6 @@ network = pylast.LastFMNetwork(api_key=lastFmCreds['apikey'], api_secret=lastFmC
 with open('last_song.json', 'r') as f:
     last_song = json.loads(f.read())
     f.close()
-    
-logger.write('   JSON: Last song was %s by %s\n' % (last_song[0],
-             last_song[1]))
-
 logger.write('   JSON: Last song was %s by %s\n' % (last_song[0], last_song[1]))
 
 ############### LIKING Song #######
@@ -57,8 +57,7 @@ else:
 jarowinkler = JaroWinkler()
 
 if last_song[0] != title:  # Check, so that this program doesn't scrobble the song multiple times
-    last_scrobble = \
-        network.get_user(lastFmCreds['username']).get_recent_tracks(limit=1)
+    last_scrobble = network.get_user(lastFmCreds['username']).get_recent_tracks(limit=1)
 
     logger.write('   LastFM: Last song was %s by %s\n'
                  % (last_scrobble[0][0].title,
@@ -66,8 +65,7 @@ if last_song[0] != title:  # Check, so that this program doesn't scrobble the so
 
     if jarowinkler.similarity(str(last_scrobble[0][0].title.lower()),
                               title.lower()) < 0.9:  # check that "nobody else" scrobbled the song
-        unix_timestamp = \
-            int(time.mktime(datetime.datetime.now().timetuple()))
+        unix_timestamp = int(time.mktime(datetime.datetime.now().timetuple()))
         if 'album' in locals():
             network.scrobble(artist=artist, title=title,
                              timestamp=unix_timestamp, album=album)
@@ -82,12 +80,17 @@ if last_song[0] != title:  # Check, so that this program doesn't scrobble the so
         with open('last_song.json', 'w') as f:
             f.write(json.dumps((title, artist)))
             f.close()
+
     else:
         logger.write("   Didn't double-scrobble because of lastFM\n")
+        with open('last_song.json', 'w') as f:
+            f.write(json.dumps((title, artist)))
+            f.close()
 else:
     logger.write("   Didn't double-scrobble because of JSON file\n")
+    with open('last_song.json', 'w') as f:
+        f.write(json.dumps((title, artist)))
+        f.close()
 
 logger.write('\n')
 logger.close()
-
-			
