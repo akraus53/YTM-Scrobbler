@@ -15,6 +15,7 @@ history = ytmusic.get_history()
 #print(history[0])
 title = history[0]['title']
 artist = history[0]['artists'][0]['name']
+liked = history[0]['likeStatus'] == 'LIKE'
 
 try:
     album = history[0]['album']['name']
@@ -45,6 +46,12 @@ with open('last_song.json', 'r') as f:
     f.close()
 
 logger.write('   JSON: Last song was %s by %s\n' % (last_song[0], last_song[1]))
+if liked:
+    network.get_track(artist, title).love()
+    logger.write('   LOVE: Loved the Song on LastFm\n')
+else:
+    network.get_track(artist, title).unlove()
+    logger.write('   LOVE: Unloved the Song on LastFm\n')
 
 if last_song[0] != title:  # Check, so that this program doesn't scrobble the song multiple times
     last_scrobble = network.get_user(username).get_recent_tracks(limit=1)
